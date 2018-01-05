@@ -8,26 +8,26 @@ import scala.concurrent.Future
 object CoinMarketCap {
   def getKeyFromTicker(cName: String, key: String): Future[String] = {
     val request = FakeBrowserHttpRequest(s"https://api.coinmarketcap.com/v1/ticker/$cName/")
-    request.send().map({ response =>
+    request.send().map { response =>
       val parsedResponse = response.body.parseOption
       if (parsedResponse.isDefined && parsedResponse.get.arrayOrEmpty.nonEmpty) {
         parsedResponse.get.array.get.head.fieldOrZero(key).as[String].getOr("0")
       }
       else "0"
-    })
+    }
   }
 }
 
 object FixerIo {
   def getCurrencyXchgRate(base: String, cName: String): Future[Double] = {
     val request = FakeBrowserHttpRequest("https://api.fixer.io/latest").withQueryParameter("base", base)
-    request.send().map({ response =>
+    request.send().map { response =>
       val parsedResponse = response.body.parseOption
       if (parsedResponse.isDefined && parsedResponse.get.hasField("rates")) {
         parsedResponse.get.fieldOrEmptyObject("rates").fieldOrZero(cName).as[Double].getOr(0.0)
       }
       else 0
-    })
+    }
   }
 }
 

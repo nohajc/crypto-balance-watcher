@@ -26,29 +26,14 @@ class HDWalletBalanceSource(addresses: Stream[String], srcImpl: BalanceSourceImp
   // TODO: cache previous results
   def scanAddressesFrom(addresses: Stream[String], i: Int, acc: Double = 0): Future[Double] = {
     val addr = addresses(i)
-    new AddressBalanceSource(addr, srcImpl).getCurrent().flatMap({ balance =>
+    new AddressBalanceSource(addr, srcImpl).getCurrent().flatMap { balance =>
       if (balance != 0)
         scanAddressesFrom(addresses, i + 1, acc + balance)
       else Future(acc)
-    })
+    }
   }
 
   override def getCurrent(c: Currency): Future[Double] = scanAddressesFrom(addresses, 0)
-  /*{
-    var totalBalance = 0.0
-    var balance = 0.0
-    var i = 0
-
-    do {
-      val addr = addresses(i)
-      balance = new AddressBalanceSource(addr, srcImpl).getCurrent()
-      totalBalance += balance
-
-      i += 1
-    } while (balance != 0)
-
-    totalBalance
-  }*/
 }
 
 class BinanceBalanceSource(host: String, credentials: Credentials) extends BalanceSource {
@@ -61,18 +46,18 @@ class BinanceBalanceSource(host: String, credentials: Credentials) extends Balan
     val url = s"https://$host/api/v3/account?$reqBody&signature=$signature"
 
     val request = HttpRequest(url).withHeader("X-MBX-APIKEY", APIKey)
-    request.send().map({ response =>
+    request.send().map { response =>
       val parsedResponse = response.body.parseOption
 
       if (parsedResponse.isDefined) {
         val balances = parsedResponse.get.fieldOrEmptyArray("balances").arrayOrEmpty
-        balances.find({elem =>
+        balances.find { elem =>
           val asset = elem.fieldOrEmptyString("asset").toString
           c.short.r.findFirstIn(asset).isDefined
-        }).getOrElse(Json.jEmptyObject).fieldOrEmptyString("free").as[Double].getOr(0.0)
+        }.getOrElse(Json.jEmptyObject).fieldOrEmptyString("free").as[Double].getOr(0.0)
       }
       else 0
-    })
+    }
   }
 }
 

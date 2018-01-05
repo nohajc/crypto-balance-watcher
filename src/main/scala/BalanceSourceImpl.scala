@@ -31,13 +31,13 @@ object BalanceSourceImpl {
 class BitPayBalanceSourceImpl(host: String) extends BalanceSourceImpl {
   override def getCurrent(addr: String): Future[Double] = {
     val request = FakeBrowserHttpRequest(s"https://$host/api/addr/$addr/utxo")
-    request.send().map({ response =>
+    request.send().map { response =>
       val parsedResponse = response.body.parseOption
       if (parsedResponse.isDefined && parsedResponse.get.isArray) {
         parsedResponse.get.arrayOrEmpty.map(_.fieldOrZero("amount").as[Double].getOr(0.0)).sum
       }
       else 0
-    })
+    }
   }
 }
 
@@ -45,14 +45,14 @@ class ChainSoBalanceSourceImpl(host: String) extends BalanceSourceImpl {
   override def getCurrent(addr: String): Future[Double] = {
     val url = s"https://$host/api/v2/get_tx_unspent/ltc/${BipUtils.convertToLTC3Address(addr)}"
     val request = FakeBrowserHttpRequest(url)
-    request.send().map({ response =>
+    request.send().map { response =>
       val parsedResponse = response.body.parseOption
       if (parsedResponse.isDefined) {
        val data = parsedResponse.get.fieldOrEmptyObject("data")
        data.fieldOrEmptyObject("txs").arrayOrEmpty.map(_.fieldOrZero("value").as[Double].getOr(0.0)).sum
       }
       else 0
-    })
+    }
   }
 }
 
@@ -67,13 +67,13 @@ class EtherScanBalanceSourceImpl(host: String) extends BalanceSourceImpl {
       .withQueryParameter("tag", "latest")
       .withQueryParameter("apikey", APIKey)
 
-    request.send().map({ response =>
+    request.send().map { response =>
       val parsedResponse = response.body.parseOption
       if (parsedResponse.isDefined && parsedResponse.get.fieldOrEmptyString("message").as[String].getOr("") == "OK") {
         parsedResponse.get.fieldOrZero("result").as[Double].getOr(0.0) / 1E18
       }
       else 0
-    })
+    }
   }
 }
 
@@ -82,12 +82,12 @@ class EtcChainBalanceSourceImpl(host: String) extends BalanceSourceImpl {
     val request = FakeBrowserHttpRequest(s"https://$host/api/v1/getAddressBalance")
       .withQueryParameter("address", addr)
 
-    request.send().map({ response =>
+    request.send().map { response =>
       val parsedResponse = response.body.parseOption
       if (parsedResponse.isDefined) {
         parsedResponse.get.fieldOrZero("balance").as[Double].getOr(0.0)
       }
       else 0
-    })
+    }
   }
 }

@@ -1,8 +1,7 @@
 import java.nio.{ByteBuffer, ByteOrder}
 
-import fr.acinq.bitcoin.{Base58, Base58Check, BinaryData, Crypto, DeterministicWallet}
+import fr.acinq.bitcoin.{Base58, Base58Check, BinaryData, Crypto}
 import fr.acinq.bitcoin.DeterministicWallet.{ExtendedPublicKey, KeyPath, derivePublicKey}
-import scorex.crypto.hash._
 
 object BipUtils {
   case class Xpub(xtype: String, depth: Int, fingerprint: Seq[Byte], childNumber: Seq[Byte], c: Seq[Byte], k: Seq[Byte])
@@ -132,8 +131,7 @@ object BipUtils {
         s"0x${BinaryData(Keccak256(uncompressed.data.drop(1).toArray).takeRight(20)).toString}"
       }
       else {
-        println(s"actual type: $xtype")
-        throw new IllegalArgumentException
+        throw new IllegalArgumentException(s"actual type: $xtype")
       }
     }
   }

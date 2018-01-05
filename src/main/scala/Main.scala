@@ -1,3 +1,5 @@
+import fr.acinq.bitcoin.BinaryData
+import fr.acinq.bitcoin.DeterministicWallet.derivePublicKey
 import monix.execution.Scheduler.Implicits.global
 
 import scala.concurrent.Await
@@ -17,21 +19,21 @@ object Main extends App {
     Wallet.fromConstant(XMR, Some(0.58325139))
   ).flatten
 
-  val balances = lst.flatMap(_.getBalances.map({ case (k, v) =>
+  val fBalances = lst.flatMap(_.getBalances.map { case (k, v) =>
     for {
       b <- v
       u <- b.inUSD
       c <- u.inCZK
     } println(s"$b, $u, $c")
     v
-  }))
+  })
 
-  val fSum = balances.map({ fb =>
+  val fSum = fBalances.map { fb =>
     for {
       b <- fb
       btc <- b.inBTC
     } yield btc.value
-  }).reduce((fb1, fb2) =>
+  }.reduce { (fb1, fb2) =>
     for {
       b1 <- fb1
       b2 <- fb2
@@ -40,15 +42,15 @@ object Main extends App {
       else if (b2.isNaN) b1
       else b1 + b2
     }
-  )
+  }
 
-  val fPrint = fSum.flatMap({sum =>
+  val fPrint = fSum.flatMap {sum =>
       val total = Balance(sum, BTC)
       for {
         totalUSD <- total.inUSD
         totalCZK <- total.inCZK
       } yield println(s"\ntotal: $total, $totalUSD, $totalCZK")
-  })
+  }
 
   Await.ready(fPrint, Duration.Inf)
   Thread.sleep(1000)
