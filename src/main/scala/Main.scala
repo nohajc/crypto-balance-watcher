@@ -1,5 +1,3 @@
-import fr.acinq.bitcoin.BinaryData
-import fr.acinq.bitcoin.DeterministicWallet.derivePublicKey
 import monix.execution.Scheduler.Implicits.global
 
 import scala.concurrent.Await
