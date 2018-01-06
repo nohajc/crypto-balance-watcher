@@ -1,6 +1,6 @@
 import java.nio.{ByteBuffer, ByteOrder}
 
-import fr.acinq.bitcoin.{Base58, Base58Check, Crypto}
+import fr.acinq.bitcoin.Crypto
 import fr.acinq.bitcoin.DeterministicWallet.{ExtendedPublicKey, KeyPath, derivePublicKey}
 
 import HexUtils._
@@ -21,8 +21,8 @@ object BipUtils {
   }
 
   class BTCAddressGenerator extends AddressGenerator {
-    val AddrTypeP2PKH = 0
-    val AddrTypeP2SH = 5
+    val AddrTypeP2PKH: Byte = 0
+    val AddrTypeP2SH: Byte = 5
 
     val XpubHeaders = Map(
       "standard" -> 0x0488b21e,
@@ -60,21 +60,15 @@ object BipUtils {
       opPush(x.size) ++ x
     }
 
-    def hash160ToB58Address(h160: Seq[Byte], addrType: Int): String = {
-      val s = Seq(addrType.toByte) ++ h160
-      Base58.encode(s ++ Crypto.hash256(s).slice(0, 4))
-    }
-
-
     def xpubToAddress(pubkey: Crypto.PublicKey, xtype: String): String = {
       require(pubkey.compressed)
 
       if (xtype == "p2wpkh-p2sh") {
         val scriptSig = Seq(0.toByte) ++ pushScript(pubkey.hash160)
-        hash160ToB58Address(Crypto.hash160(scriptSig), AddrTypeP2SH)
+        Base58Check.encode(AddrTypeP2SH, Crypto.hash160(scriptSig))
       }
       else if (xtype == "standard") {
-        Base58Check.encode(Base58.Prefix.PubkeyAddress, pubkey.hash160)
+        Base58Check.encode(AddrTypeP2PKH, pubkey.hash160)
       }
       // TODO: support legacy addresses
       else {
@@ -84,9 +78,7 @@ object BipUtils {
     }
 
     def xpubFromString(xpubStr: String): (ExtendedPublicKey, String) = {
-      val xpubBytes = Base58Check.decode(xpubStr) match {
-        case (head, tail) => head +: tail
-      }
+      val xpubBytes = Base58Check.decode(xpubStr)
       val xpubD = deserializeXpub(xpubBytes)
       (ExtendedPublicKey(xpubD.k, xpubD.c, 0, KeyPath(Seq(0)), 0), xpubD.xtype)
     }
@@ -110,13 +102,13 @@ object BipUtils {
   class BCHAddressGenerator extends BTCAddressGenerator
 
   class BTGAddressGenerator extends BTCAddressGenerator {
-    override val AddrTypeP2PKH = 38
-    override val AddrTypeP2SH = 23
+    override val AddrTypeP2PKH: Byte = 38
+    override val AddrTypeP2SH: Byte = 23
   }
 
   class LTCAddressGenerator extends BTCAddressGenerator {
-    //override val AddrTypeP2PKH = ???
-    override val AddrTypeP2SH = 50
+    //override val AddrTypeP2PKH: Byte = ???
+    override val AddrTypeP2SH: Byte = 50
 
     override val XpubHeaders = Map(
       "p2wpkh-p2sh" -> 0x1b26ef6
@@ -140,5 +132,5 @@ object BipUtils {
 
   class ETCAddressGenerator extends ETHAddressGenerator
 
-  def convertToLTC3Address(addr: String): String = Base58Check.encode(5.toByte, Base58Check.decode(addr)._2)
+  def convertToLTC3Address(addr: String): String = Base58Check.encode(5.toByte, Base58Check.decode(addr))
 }
