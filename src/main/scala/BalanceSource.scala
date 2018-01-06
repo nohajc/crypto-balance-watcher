@@ -4,7 +4,6 @@ import argonaut._
 import Argonaut._
 
 import scala.concurrent.Future
-import fr.hmil.roshttp.HttpRequest
 import monix.execution.Scheduler.Implicits.global
 
 trait BalanceSource {
@@ -42,10 +41,10 @@ class BinanceBalanceSource(host: String, credentials: Credentials) extends Balan
 
   override def getCurrent(c: Currency): Future[Double] = {
     val reqBody = s"timestamp=${Instant.now.toEpochMilli}"
-    val signature = HMAC(APISecret, reqBody)
+    val signature = HMAC(SHA256)(APISecret, reqBody)
     val url = s"https://$host/api/v3/account?$reqBody&signature=$signature"
 
-    val request = HttpRequest(url).withHeader("X-MBX-APIKEY", APIKey)
+    val request = FakeBrowserHttpRequest(url).withHeader("X-MBX-APIKEY", APIKey)
     request.send().map { response =>
       val parsedResponse = response.body.parseOption
 

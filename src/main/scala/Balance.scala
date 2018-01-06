@@ -1,6 +1,6 @@
 import argonaut._
 import Argonaut._
-import fr.hmil.roshttp.HttpRequest
+
 import monix.execution.Scheduler.Implicits.global
 
 import scala.concurrent.Future

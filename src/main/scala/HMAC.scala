@@ -1,14 +1,25 @@
-import javax.crypto.Mac
-import javax.crypto.spec.SecretKeySpec
+import HexUtils._
 
-import fr.acinq.bitcoin.BinaryData
+class HMAC(hashAlgo: HashAlgo) {
+
+  def apply(secret: String, msg: String): String = {
+    val key =
+      if (secret.length > 64)
+        hashAlgo(secret.getBytes)
+      else
+        secret.getBytes
+
+    val keyp = key ++ Array.fill[Byte](key.length % hashAlgo.blockSize)(0)
+    val opad = Array.fill[Byte](hashAlgo.blockSize)(0x5c.toByte)
+    val ipad = Array.fill[Byte](hashAlgo.blockSize)(0x36.toByte)
+
+    val kXORopad = keyp.zip(opad).map {case (a, b) => (a ^ b).toByte}
+    val kXORipad =keyp.zip(ipad).map {case (a, b) => (a ^ b).toByte}
+
+    hashAlgo(kXORopad ++ hashAlgo(kXORipad ++ msg.getBytes)).toHexString
+  }
+}
 
 object HMAC {
-  def apply(secret: String, msg: String): String = {
-    val keySpec = new SecretKeySpec(secret.getBytes, "SHA256")
-    val mac = Mac.getInstance("HmacSHA256")
-    mac.init(keySpec)
-    val hash = mac.doFinal(msg.getBytes)
-    BinaryData(hash).toString
-  }
+  def apply(hash: HashAlgo): HMAC = new HMAC(hash)
 }

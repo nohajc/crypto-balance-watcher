@@ -1,7 +1,9 @@
 import java.nio.{ByteBuffer, ByteOrder}
 
-import fr.acinq.bitcoin.{Base58, Base58Check, BinaryData, Crypto}
+import fr.acinq.bitcoin.{Base58, Base58Check, Crypto}
 import fr.acinq.bitcoin.DeterministicWallet.{ExtendedPublicKey, KeyPath, derivePublicKey}
+
+import HexUtils._
 
 object BipUtils {
   case class Xpub(xtype: String, depth: Int, fingerprint: Seq[Byte], childNumber: Seq[Byte], c: Seq[Byte], k: Seq[Byte])
@@ -44,21 +46,21 @@ object BipUtils {
       Xpub(xtype, depth, fingerprint, childNumber, c, k)
     }
 
-    def intToBinaryData(i: Int, len: Int): BinaryData =
+    def intToBytes(i: Int, len: Int): Seq[Byte] =
       ByteBuffer.allocate(if (len < 4) 4 else len).order(ByteOrder.LITTLE_ENDIAN).putInt(i).array.take(len)
 
-    def opPush(i: Int): BinaryData = {
-      if (i < 0x4c)  intToBinaryData(i, 1)
-      else if (i < 0xff) Seq(0x4c.toByte) ++ intToBinaryData(i, 1)
-      else if (i < 0xffff) Seq(0x4d.toByte) ++ intToBinaryData(i, 2)
-      else Seq(0x4e.toByte) ++ intToBinaryData(i, 4)
+    def opPush(i: Int): Seq[Byte] = {
+      if (i < 0x4c)  intToBytes(i, 1)
+      else if (i < 0xff) Seq(0x4c.toByte) ++ intToBytes(i, 1)
+      else if (i < 0xffff) Seq(0x4d.toByte) ++ intToBytes(i, 2)
+      else Seq(0x4e.toByte) ++ intToBytes(i, 4)
     }
 
-    def pushScript(x: BinaryData): BinaryData = {
+    def pushScript(x: Seq[Byte]): Seq[Byte] = {
       opPush(x.size) ++ x
     }
 
-    def hash160ToB58Address(h160: BinaryData, addrType: Int): String = {
+    def hash160ToB58Address(h160: Seq[Byte], addrType: Int): String = {
       val s = Seq(addrType.toByte) ++ h160
       Base58.encode(s ++ Crypto.hash256(s).slice(0, 4))
     }
@@ -128,7 +130,7 @@ object BipUtils {
 
       if (xtype == "standard") {
         val uncompressed = pubkey.copy(compressed = false)
-        s"0x${BinaryData(Keccak256(uncompressed.data.drop(1).toArray).takeRight(20)).toString}"
+        Keccak256(uncompressed.data.drop(1).toArray).takeRight(20).toHexString("0x")
       }
       else {
         throw new IllegalArgumentException(s"actual type: $xtype")
