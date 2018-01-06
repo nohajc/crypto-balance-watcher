@@ -11,8 +11,8 @@ object Main extends App {
     Wallet.fromXpub(BCH, Secret.get[String]("XpubBCH"), "bch-bitcore2.trezor.io"/*"cashexplorer.bitcoin.com"*/),
     Wallet.fromXpub(BTG, Secret.get[String]("XpubBTG"), "btg-bitcore2.trezor.io"),
     Wallet.fromXpub(LTC, Secret.get[String]("XpubLTC"), "ltc-bitcore2.trezor.io"/*"chain.so"*/),
-    Wallet.fromXpub(ETH, Secret.get[String]("XpubETH"), "api.etherscan.io"),
-    Wallet.fromXpub(ETC, Secret.get[String]("XpubETC"), "etcchain.com"),
+    Wallet.fromXpub(ETH, Secret.get[String]("XpubETH"), "api.ethplorer.io"/*api.etherscan.io"*/),
+    Wallet.fromXpub(ETC, Secret.get[String]("XpubETC"), "api.gastracker.io"/*"etcchain.com"*/),
     Wallet.fromExchange(Seq(ADA, IOTA, TRX), "api.binance.com", Secret.get[Credentials]("BinanceAPI")),
     Wallet.fromConstant(XMR, Some(0.58325139))
   ).flatten

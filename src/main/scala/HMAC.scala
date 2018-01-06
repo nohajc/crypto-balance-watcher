@@ -1,6 +1,8 @@
 import HexUtils._
 
 class HMAC(hashAlgo: HashAlgo) {
+  private val opad = Array.fill[Byte](hashAlgo.blockSize)(0x5c.toByte)
+  private val ipad = Array.fill[Byte](hashAlgo.blockSize)(0x36.toByte)
 
   def apply(secret: String, msg: String): String = {
     val key =
@@ -10,11 +12,9 @@ class HMAC(hashAlgo: HashAlgo) {
         secret.getBytes
 
     val keyp = key ++ Array.fill[Byte](key.length % hashAlgo.blockSize)(0)
-    val opad = Array.fill[Byte](hashAlgo.blockSize)(0x5c.toByte)
-    val ipad = Array.fill[Byte](hashAlgo.blockSize)(0x36.toByte)
 
     val kXORopad = keyp.zip(opad).map {case (a, b) => (a ^ b).toByte}
-    val kXORipad =keyp.zip(ipad).map {case (a, b) => (a ^ b).toByte}
+    val kXORipad = keyp.zip(ipad).map {case (a, b) => (a ^ b).toByte}
 
     hashAlgo(kXORopad ++ hashAlgo(kXORipad ++ msg.getBytes)).toHexString
   }
