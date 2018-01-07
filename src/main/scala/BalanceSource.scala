@@ -3,6 +3,7 @@ import java.time.Instant
 import argonaut._
 import Argonaut._
 import crypto.{HMAC, SHA256}
+import utils.HexUtils._
 
 import scala.concurrent.Future
 import monix.execution.Scheduler.Implicits.global
@@ -42,7 +43,7 @@ class BinanceBalanceSource(host: String, credentials: Credentials) extends Balan
 
   override def getCurrent(c: Currency): Future[Double] = {
     val reqBody = s"timestamp=${Instant.now.toEpochMilli}"
-    val signature = HMAC(SHA256)(APISecret, reqBody)
+    val signature = HMAC(SHA256)(APISecret.getBytes, reqBody.getBytes).toHexString
     val url = s"https://$host/api/v3/account?$reqBody&signature=$signature"
 
     val request = FakeBrowserHttpRequest(url).withHeader("X-MBX-APIKEY", APIKey)

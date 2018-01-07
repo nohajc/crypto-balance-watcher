@@ -6,7 +6,6 @@ trait SHAWord[T] {
 }
 
 abstract class SHA[T: SHAWord] extends HashAlgo {
-  def blockSize: Int
   def roundCount: Int
   def msgLengthTypeSize: Int
 
