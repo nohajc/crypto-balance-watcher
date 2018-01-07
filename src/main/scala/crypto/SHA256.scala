@@ -1,9 +1,11 @@
 package crypto
 
-object SHA256 extends HashAlgo {
+object SHA256 extends SHA[Int] {
   override def blockSize: Int = 64
+  def roundCount: Int = 64
+  def msgLengthTypeSize: Int = 8
 
-  private val HS = Array(
+  override val HS = Array(
     0x6a09e667,
     0xbb67ae85,
     0x3c6ef372,
@@ -14,7 +16,7 @@ object SHA256 extends HashAlgo {
     0x5be0cd19
   )
 
-  private val KS = Array(
+  override val KS = Array(
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
     0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
     0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
@@ -33,32 +35,22 @@ object SHA256 extends HashAlgo {
     0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
   )
 
-  private val block = Array.fill[Byte](64)(0)
-  private val words = Array.fill[Int](64)(0)
+  private val words = Array.fill[Int](roundCount)(0)
 
-  private def padMessage(data: Array[Byte]): Array[Byte] = {
-    val length = data.length
-    val tail = length % 64
-    val lenInBytes = longToBytes(length * 8)
-    val npad = if (tail < 56) 55 - tail else 119 - tail
-
-    data ++ Array(0x80.toByte) ++ Array.fill[Byte](npad)(0) ++ lenInBytes
-  }
-
-  private def iterate(regs: Array[Int], j: Int): Unit = {
-    val s0 = Integer.rotateRight(regs(0), 2) ^
+  override def iterate(regs: Array[Int], j: Int): Unit = {
+    val S0 = Integer.rotateRight(regs(0), 2) ^
       Integer.rotateRight(regs(0), 13) ^
       Integer.rotateRight(regs(0), 22)
 
     val maj = (regs(0) & regs(1)) ^ (regs(0) & regs(2)) ^ (regs(1) & regs(2))
-    val temp2 = s0 + maj
+    val temp2 = S0 + maj
 
-    val s1 = Integer.rotateRight(regs(4), 6) ^
+    val S1 = Integer.rotateRight(regs(4), 6) ^
       Integer.rotateRight(regs(4), 11) ^
       Integer.rotateRight(regs(4), 25)
 
     val ch = (regs(4) & regs(5)) ^ (~regs(4) & regs(6))
-    val temp1 = regs(7) + s1 + ch + KS(j) + words(j)
+    val temp1 = regs(7) + S1 + ch + KS(j) + words(j)
 
     regs(7) = regs(6)
     regs(6) = regs(5)
@@ -70,15 +62,7 @@ object SHA256 extends HashAlgo {
     regs(0) = temp1 + temp2
   }
 
-  private def intToBytes(i: Int): Array[Byte] = { // BigEndian
-    for (c <- 0 until 4) yield (i >>> (24 - 8 * c)).toByte
-  }.toArray
-
-  private def longToBytes(l: Long): Array[Byte] = { // BigEndian
-    for (c <- 0 until 8) yield (l >>> (56 - 8 * c)).toByte
-  }.toArray
-
-  private def blockToWords(): Unit = {
+  override def blockToWords(): Unit = {
     for (j <- 0 until 16) {
       words(j) = 0
       for (m <- 0 until 4) {
@@ -87,37 +71,17 @@ object SHA256 extends HashAlgo {
     }
   }
 
-  override def apply(data: Array[Byte]): Array[Byte] = {
-    val padded = padMessage(data)
-    val hs = HS.clone
+  override def fillRestOfWords(): Unit = {
+    for (j <- 16 until roundCount) {
+      val s0 = Integer.rotateRight(words(j - 15), 7) ^
+        Integer.rotateRight(words(j - 15), 18) ^
+        (words(j - 15) >>> 3)
 
-    for (i <- padded.indices by 64) {
-      val regs = hs.clone
-      Array.copy(padded, i, block, 0, 64)
+      val s1 = Integer.rotateRight(words(j - 2), 17) ^
+        Integer.rotateRight(words(j - 2), 19) ^
+        (words(j - 2) >>> 10)
 
-      blockToWords()
-
-      for (j <- 16 until 64) {
-        val s0 = Integer.rotateRight(words(j - 15), 7) ^
-          Integer.rotateRight(words(j - 15), 18) ^
-          (words(j - 15) >>> 3)
-
-        val s1 = Integer.rotateRight(words(j - 2), 17) ^
-          Integer.rotateRight(words(j - 2), 19) ^
-          (words(j - 2) >>> 10)
-
-        words(j) = words(j - 16) + s0 + words(j - 7) + s1
-      }
-
-      for (j <- 0 until 64) {
-        iterate(regs, j)
-      }
-
-      for (j <- 0 until 8) {
-        hs(j) = hs(j) + regs(j)
-      }
+      words(j) = words(j - 16) + s0 + words(j - 7) + s1
     }
-
-    hs.flatMap(intToBytes)
   }
 }
