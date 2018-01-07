@@ -1,4 +1,6 @@
-import HexUtils._
+package crypto
+
+import utils.HexUtils._
 
 class HMAC(hashAlgo: HashAlgo) {
   private val opad = Array.fill[Byte](hashAlgo.blockSize)(0x5c.toByte)

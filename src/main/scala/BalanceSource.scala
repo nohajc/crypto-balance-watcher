@@ -2,6 +2,7 @@ import java.time.Instant
 
 import argonaut._
 import Argonaut._
+import crypto.{HMAC, SHA256}
 
 import scala.concurrent.Future
 import monix.execution.Scheduler.Implicits.global

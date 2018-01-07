@@ -1,3 +1,5 @@
+package crypto
+
 object SHA256 extends HashAlgo {
   override def blockSize: Int = 64
 

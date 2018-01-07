@@ -1,3 +1,7 @@
+package crypto
+
+import utils.ArrayBytes._
+
 /*
   Port of tiny_sha3 to Scala
   Original code: https://github.com/mjosaarinen/tiny_sha3
@@ -30,7 +34,6 @@
  */
 
 object Keccak {
-  import ArrayBytes._
 
   private class Sha3Ctx(var st: Array[Long], var pt: Int, val rsiz: Int, val mdlen: Int)
 
@@ -60,6 +63,7 @@ object Keccak {
   private def rotl64(x: Long, y: Int) = (x << y) | (x >>> (64 - y))
 
   private def sha3Keccakf(st: Array[Long]): Unit = {
+    // TODO: support big-endian machines
     var t: Long = 0
     val bc = Array.fill[Long](5)(0)
 

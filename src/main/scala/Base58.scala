@@ -1,3 +1,5 @@
+import crypto.{Bitcoin, SHA256}
+
 object Base58 {
   private val charset = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
   private val charval = charset.zipWithIndex.toMap
@@ -31,7 +33,7 @@ object Base58 {
 }
 
 object Base58Check {
-  def checksum(data: Seq[Byte]): Seq[Byte] = SHA256(SHA256(data.toArray)).take(4)
+  def checksum(data: Seq[Byte]): Seq[Byte] = Bitcoin.HASH256(data.toArray).take(4)
 
   def encode(prefix: Byte, data: Seq[Byte]): String = {
     val str = prefix +: data

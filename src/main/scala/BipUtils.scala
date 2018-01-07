@@ -2,8 +2,8 @@ import java.nio.{ByteBuffer, ByteOrder}
 
 import fr.acinq.bitcoin.Crypto
 import fr.acinq.bitcoin.DeterministicWallet.{ExtendedPublicKey, KeyPath, derivePublicKey}
-
-import HexUtils._
+import utils.HexUtils._
+import crypto.{Bitcoin, Keccak256}
 
 object BipUtils {
   case class Xpub(xtype: String, depth: Int, fingerprint: Seq[Byte], childNumber: Seq[Byte], c: Seq[Byte], k: Seq[Byte])
@@ -64,11 +64,11 @@ object BipUtils {
       require(pubkey.compressed)
 
       if (xtype == "p2wpkh-p2sh") {
-        val scriptSig = Seq(0.toByte) ++ pushScript(pubkey.hash160)
-        Base58Check.encode(AddrTypeP2SH, Crypto.hash160(scriptSig))
+        val scriptSig = Seq(0.toByte) ++ pushScript(Bitcoin.HASH160(pubkey.toBin))
+        Base58Check.encode(AddrTypeP2SH, Bitcoin.HASH160(scriptSig))
       }
       else if (xtype == "standard") {
-        Base58Check.encode(AddrTypeP2PKH, pubkey.hash160)
+        Base58Check.encode(AddrTypeP2PKH, Bitcoin.HASH160(pubkey.toBin))
       }
       // TODO: support legacy addresses
       else {
