@@ -6,7 +6,17 @@ import utils.HexUtils._
 import crypto.{Bitcoin, Keccak256}
 
 object BipUtils {
-  case class Xpub(xtype: String, depth: Int, fingerprint: Seq[Byte], childNumber: Seq[Byte], c: Seq[Byte], k: Seq[Byte])
+  class Xpub(val xtype: String, xpub: ExtendedPublicKey) {
+    def this(xtype: String, depth: Int, fingerprint: Seq[Byte], childNumber: Seq[Byte], c: Seq[Byte], k: Seq[Byte]) = {
+      this(xtype, ExtendedPublicKey(k, c, depth, KeyPath(Seq(0)), 0))
+    }
+
+    def publicKey: Crypto.PublicKey =  xpub.publicKey
+
+    def deriveXpub(idx: Long): Xpub = {
+      new Xpub(xtype, derivePublicKey(xpub, idx))
+    }
+  }
 
   sealed trait AddressKind
   case object ReceivingAddr extends AddressKind
@@ -43,7 +53,7 @@ object BipUtils {
       val xtype = found.get._1
       val k = key.drop(13 + 32)
 
-      Xpub(xtype, depth, fingerprint, childNumber, c, k)
+      new Xpub(xtype, depth, fingerprint, childNumber, c, k)
     }
 
     def intToBytes(i: Int, len: Int): Seq[Byte] =
@@ -77,10 +87,9 @@ object BipUtils {
       }
     }
 
-    def xpubFromString(xpubStr: String): (ExtendedPublicKey, String) = {
+    def xpubFromString(xpubStr: String): Xpub = {
       val xpubBytes = Base58Check.decode(xpubStr)
-      val xpubD = deserializeXpub(xpubBytes)
-      (ExtendedPublicKey(xpubD.k, xpubD.c, 0, KeyPath(Seq(0)), 0), xpubD.xtype)
+      deserializeXpub(xpubBytes)
     }
 
     def getAddressesFromXpubString(xpubStr: String, kind: AddressKind): Stream[String] = {
@@ -89,10 +98,11 @@ object BipUtils {
         case ChangeAddr => 1L
       }
       val xpub = xpubFromString(xpubStr)
-      val derived = derivePublicKey(xpub._1, kindIdx)
+      val derived = xpub.deriveXpub(kindIdx)
 
       def from(n: Int): Stream[String] = {
-        val addr = xpubToAddress(derivePublicKey(derived, n).publicKey, xpub._2)
+        val aKey = derived.deriveXpub(n)
+        val addr = xpubToAddress(aKey.publicKey, aKey.xtype)
         addr #:: from(n + 1)
       }
 
