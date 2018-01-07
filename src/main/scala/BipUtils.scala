@@ -6,15 +6,27 @@ import utils.HexUtils._
 import crypto.{Bitcoin, Keccak256}
 
 object BipUtils {
-  class Xpub(val xtype: String, xpub: ExtendedPublicKey) {
+  trait Xpub {
+    def xtype: String
+    def publicKey: Crypto.PublicKey
+    def deriveXpub(idx: Long): Xpub
+  }
+
+  object Xpub {
+    def create(xtype: String, depth: Int, fingerprint: Seq[Byte], childNumber: Seq[Byte], c: Seq[Byte], k: Seq[Byte]): Xpub = {
+      new AcinqXpub(xtype, ExtendedPublicKey(k, c, depth, KeyPath(Seq(0)), 0))
+    }
+  }
+
+  class AcinqXpub(val xtype: String, xpub: ExtendedPublicKey) extends Xpub {
     def this(xtype: String, depth: Int, fingerprint: Seq[Byte], childNumber: Seq[Byte], c: Seq[Byte], k: Seq[Byte]) = {
       this(xtype, ExtendedPublicKey(k, c, depth, KeyPath(Seq(0)), 0))
     }
 
-    def publicKey: Crypto.PublicKey =  xpub.publicKey
+    def publicKey: Crypto.PublicKey = xpub.publicKey
 
     def deriveXpub(idx: Long): Xpub = {
-      new Xpub(xtype, derivePublicKey(xpub, idx))
+      new AcinqXpub(xtype, derivePublicKey(xpub, idx))
     }
   }
 
@@ -53,7 +65,7 @@ object BipUtils {
       val xtype = found.get._1
       val k = key.drop(13 + 32)
 
-      new Xpub(xtype, depth, fingerprint, childNumber, c, k)
+      Xpub.create(xtype, depth, fingerprint, childNumber, c, k)
     }
 
     def intToBytes(i: Int, len: Int): Seq[Byte] =
