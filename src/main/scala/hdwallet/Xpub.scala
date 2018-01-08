@@ -23,7 +23,7 @@ object Xpub {
     factory = f
   }
 
-  def create(xtype: String, depth: Int, fingerprint: Seq[Byte],
+  def apply(xtype: String, depth: Int, fingerprint: Seq[Byte],
              childNumber: Seq[Byte], c: Seq[Byte], k: Seq[Byte]): Xpub = {
     factory.create(xtype, depth, fingerprint, childNumber, c, k)
   }

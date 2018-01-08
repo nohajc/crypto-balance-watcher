@@ -43,7 +43,7 @@ class BTCAddressGenerator extends AddressGenerator {
     val xtype = found.get._1
     val k = key.drop(13 + 32)
 
-    Xpub.create(xtype, depth, fingerprint, childNumber, c, k)
+    Xpub(xtype, depth, fingerprint, childNumber, c, k)
   }
 
   def intToBytes(i: Int, len: Int): Seq[Byte] =
