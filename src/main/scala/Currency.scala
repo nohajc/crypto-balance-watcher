@@ -1,4 +1,4 @@
-import BipUtils._
+import hdwallet._
 
 sealed trait Currency {
   val name: String

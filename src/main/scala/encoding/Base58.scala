@@ -1,4 +1,6 @@
-import crypto.{Bitcoin, SHA256}
+package encoding
+
+import crypto.Bitcoin
 
 object Base58 {
   private val charset = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"

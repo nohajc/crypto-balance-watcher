@@ -1,5 +1,6 @@
 import argonaut._
 import Argonaut._
+import hdwallet.AddressUtils
 
 import scala.concurrent.Future
 import monix.execution.Scheduler.Implicits.global
@@ -48,7 +49,7 @@ class BitPayBalanceSourceImpl(host: String) extends BalanceSourceImpl {
 
 class ChainSoBalanceSourceImpl(host: String) extends BalanceSourceImpl {
   override def getCurrent(addr: String): Future[Double] = {
-    val url = s"https://$host/api/v2/get_tx_unspent/ltc/${BipUtils.convertToLTC3Address(addr)}"
+    val url = s"https://$host/api/v2/get_tx_unspent/ltc/${AddressUtils.convertToLTC3Address(addr)}"
     val request = FakeBrowserHttpRequest(url)
     request.send().map { response =>
       val parsedResponse = response.body.parseOption

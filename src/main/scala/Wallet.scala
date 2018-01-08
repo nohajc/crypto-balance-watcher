@@ -1,5 +1,6 @@
 import fr.hmil.roshttp.exceptions.HttpException
 import fr.hmil.roshttp.response.SimpleHttpResponse
+import hdwallet.ReceivingAddr
 
 import scala.concurrent.Future
 import monix.execution.Scheduler.Implicits.global
@@ -20,7 +21,7 @@ class Wallet(source: BalanceSource, currencies: Seq[Currency]) { // TODO: multis
 object Wallet {
   def fromXpub(currency: Currency, xpubStr: String, queryHost: String): Wallet = {
     val srcImpl = BalanceSourceImpl.fromHost(queryHost)
-    val recvAddresses = currency.addressGenerator.getAddressesFromXpubString(xpubStr, BipUtils.ReceivingAddr)
+    val recvAddresses = currency.addressGenerator.getAddressesFromXpubString(xpubStr, ReceivingAddr)
     val balanceSrc = new HDWalletBalanceSource(recvAddresses, srcImpl)
     new Wallet(balanceSrc, Seq(currency))
   }
