@@ -24,8 +24,8 @@ class AcinqXpub(val xtype: String, xpub: ExtendedPublicKey) extends Xpub {
   }
 }
 
-class AcinqXpubFactory extends Xpub.Factory {
-  override def create(xtype: String, depth: Int, fingerprint: Seq[Byte],
+object AcinqXpub extends Xpub.Factory {
+  override def apply(xtype: String, depth: Int, fingerprint: Seq[Byte],
                       childNumber: Seq[Byte], c: Seq[Byte], k: Seq[Byte]): Xpub = {
     new AcinqXpub(xtype, ExtendedPublicKey(k, c, depth, KeyPath(Seq(0)), 0))
   }

@@ -12,8 +12,8 @@ abstract class Xpub {
 }
 
 object Xpub {
-  abstract class Factory {
-    def create(xtype: String, depth: Int, fingerprint: Seq[Byte],
+  trait Factory {
+    def apply(xtype: String, depth: Int, fingerprint: Seq[Byte],
                childNumber: Seq[Byte], c: Seq[Byte], k: Seq[Byte]): Xpub
   }
 
@@ -25,6 +25,6 @@ object Xpub {
 
   def apply(xtype: String, depth: Int, fingerprint: Seq[Byte],
              childNumber: Seq[Byte], c: Seq[Byte], k: Seq[Byte]): Xpub = {
-    factory.create(xtype, depth, fingerprint, childNumber, c, k)
+    factory(xtype, depth, fingerprint, childNumber, c, k)
   }
 }

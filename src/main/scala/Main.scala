@@ -1,11 +1,11 @@
-import hdwallet.{AcinqXpubFactory, Xpub}
+import hdwallet.{AcinqXpub, Xpub}
 import monix.execution.Scheduler.Implicits.global
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 object Main extends App {
-  Xpub.selectImplementation(new AcinqXpubFactory)
+  Xpub.selectImplementation(AcinqXpub)
 
   if (args.length > 0) Secret.initFromFile(args(0))
 
