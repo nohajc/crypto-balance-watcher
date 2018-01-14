@@ -44,4 +44,18 @@ object Secret {
     val getter = implicitly[JsonGetter[T]]
     store.field(key).map(v => getter.get(v))
   }
+
+
+  trait JsonArrayGetter[T] {
+    def get(field: Json): Array[T]
+  }
+
+  implicit val stringArrayGetter: JsonArrayGetter[String] = new JsonArrayGetter[String] {
+    def get(field: Json): Array[String] = field.arrayOrEmpty.toArray[Json].map(v => v.as[String].getOr(""))
+  }
+
+  def getArray[T: JsonArrayGetter](key: String): Option[Array[T]] = {
+    val getter = implicitly[JsonArrayGetter[T]]
+    store.field(key).map(v => getter.get(v))
+  }
 }

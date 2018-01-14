@@ -1,7 +1,7 @@
 import hdwallet.{AcinqXpub, Xpub}
 import monix.execution.Scheduler.Implicits.global
 
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
 
 object Main extends App {
@@ -16,7 +16,8 @@ object Main extends App {
     Wallet.fromXpub(LTC, Secret.get[String]("XpubLTC"), "ltc-bitcore2.trezor.io"/*"chain.so"*/),
     Wallet.fromXpub(ETH, Secret.get[String]("XpubETH"), "api.ethplorer.io"/*api.etherscan.io"*/),
     Wallet.fromXpub(ETC, Secret.get[String]("XpubETC"), "api.gastracker.io"/*"etcchain.com"*/),
-    Wallet.fromExchange(Seq(ADA, IOTA, TRX), "api.binance.com", Secret.get[Credentials]("BinanceAPI")),
+    Wallet.fromAddressList(ADA, Secret.getArray[String]("AddressListADA"), "cardanoexplorer.com"),
+    Wallet.fromExchange(Seq(IOTA, TRX), "api.binance.com", Secret.get[Credentials]("BinanceAPI")),
     Wallet.fromConstant(XMR, Some(0.58325139))
   ).flatten
 
@@ -29,20 +30,17 @@ object Main extends App {
     v
   })
 
-  val fSum = fBalances.map { fb =>
+  val fValues = fBalances.map { fb =>
     for {
       b <- fb
       btc <- b.inBTC
     } yield btc.value
-  }.reduce { (fb1, fb2) =>
-    for {
-      b1 <- fb1
-      b2 <- fb2
-    } yield {
-      if (b1.isNaN) b2
-      else if (b2.isNaN) b1
-      else b1 + b2
-    }
+  }
+
+  val fSum = Future.reduce(fValues) { (b1, b2) =>
+    if (b1.isNaN) b2
+    else if (b2.isNaN) b1
+    else b1 + b2
   }
 
   val fPrint = fSum.flatMap {sum =>

@@ -25,6 +25,7 @@ object BalanceSourceImpl {
     case host4 if host4 == "chain.so" => new ChainSoBalanceSourceImpl(host4)
     case host5 if host5 == "api.ethplorer.io" => new EthplorerBalanceSourceImpl(host5)
     case host6 if host6 == "api.gastracker.io" => new GasTrackerBalanceSourceImpl(host6)
+    case host7 if host7 == "cardanoexplorer.com" => new CardanoExplorerBalanceSourceImpl(host7)
     case host_ => new BalanceSourceImpl {
       println(s"${host_}: balance source not implemented")
       override def getCurrent(arg: String): Future[Double] = Future(Double.NaN)
@@ -120,6 +121,23 @@ class GasTrackerBalanceSourceImpl(host: String) extends BalanceSourceImpl {
       val parsedResponse = response.body.parseOption
       if (parsedResponse.isDefined) {
         parsedResponse.get.fieldOrEmptyObject("balance").fieldOrZero("wei").as[Double].getOr(0.0) / 1E18
+      }
+      else 0
+    }
+  }
+}
+
+class CardanoExplorerBalanceSourceImpl(host: String) extends BalanceSourceImpl {
+  override def getCurrent(addr: String): Future[Double] = {
+    val request = FakeBrowserHttpRequest(s"https://$host/api/addresses/summary/$addr")
+      .withHeader("Accept", "application/json")
+    request.send().map { response =>
+      val parsedResponse = response.body.parseOption
+      if (parsedResponse.isDefined) {
+        parsedResponse.get.fieldOrEmptyObject("Right")
+          .fieldOrEmptyObject("caBalance")
+          .fieldOrZero("getCoin")
+          .as[Long].getOr(0L) / 1E6
       }
       else 0
     }

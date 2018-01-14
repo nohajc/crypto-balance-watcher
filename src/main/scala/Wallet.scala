@@ -10,7 +10,7 @@ class Wallet(source: BalanceSource, currencies: Seq[Currency]) { // TODO: multis
 
   def getBalance(currency: Currency): Future[Balance] = source.getCurrent(currency).map(b => Balance(b , currency)).recover {
     case HttpException(e: SimpleHttpResponse) =>
-      println(e.body)
+      Console.err.println(s"HTTP EXCEPTION: statusCode = ${e.statusCode}")
       Balance(Double.NaN, currency)
   }
   def getBalance: Future[Balance] = getBalance(currencies.head)
@@ -28,6 +28,15 @@ object Wallet {
 
   def fromXpub(currency: Currency, opXpub: Option[String], queryHost: String): Option[Wallet] =
     opXpub.map(xpub => fromXpub(currency, xpub, queryHost))
+
+  def fromAddressList(currency: Currency, addressList: Array[String], queryHost: String): Wallet = {
+    val srcImpl = BalanceSourceImpl.fromHost(queryHost)
+    val balanceSrc = new HDWalletBalanceSource(addressList.toStream, srcImpl)
+    new Wallet(balanceSrc, Seq(currency))
+  }
+
+  def fromAddressList(currency: Currency, opAddrList: Option[Array[String]], queryHost: String): Option[Wallet] =
+    opAddrList.map(addrList => fromAddressList(currency, addrList, queryHost))
 
   def fromExchange(currencies: Seq[Currency], queryHost: String, credentials: Credentials): Wallet = {
     val balanceSrc = BalanceSource.fromHost(queryHost, credentials)
