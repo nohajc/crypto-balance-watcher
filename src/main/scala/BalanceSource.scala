@@ -1,5 +1,3 @@
-import java.time.Instant
-
 import argonaut._
 import Argonaut._
 import crypto.{HMAC, SHA256}
@@ -42,7 +40,7 @@ class BinanceBalanceSource(host: String, credentials: Credentials) extends Balan
   private val APISecret: String = credentials.secret
 
   override def getCurrent(c: Currency): Future[Double] = {
-    val reqBody = s"timestamp=${Instant.now.toEpochMilli}"
+    val reqBody = s"timestamp=${System.currentTimeMillis}"
     val signature = HMAC(SHA256)(APISecret.getBytes, reqBody.getBytes).toHexString
     val url = s"https://$host/api/v3/account?$reqBody&signature=$signature"
 
