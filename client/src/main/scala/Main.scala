@@ -30,6 +30,8 @@ object Main {
       Wallet.fromExchange(Seq(IOTA, TRX), "api.binance.com", Secret.get[Credentials]("BinanceAPI")),
       Wallet.fromConstant(XMR, Some(0.58325139))
     ).flatten
+
+    renderWalletList()
   }
 
   def refresh(): Unit = {
@@ -38,7 +40,12 @@ object Main {
         b <- v
         u <- b.inUSD
         c <- u.inCZK
-      } println(s"$b, $u, $c")
+      } {
+        val tr = jQuery(s"#balance-${b.currency.name}")
+        tr.find(".coins").html(b.toString)
+        tr.find(".usd").html(u.toString)
+        tr.find(".czk").html(c.toString)
+      }
       v
     })
 
@@ -60,7 +67,12 @@ object Main {
       for {
         totalUSD <- total.inUSD
         totalCZK <- total.inCZK
-      } yield println(s"\ntotal: $total, $totalUSD, $totalCZK")
+      } yield {
+        val tr = jQuery(s"#balance-total")
+        tr.find(".coins").html(total.toString)
+        tr.find(".usd").html(totalUSD.toString)
+        tr.find(".czk").html(totalCZK.toString)
+      }
     }
   }
 
@@ -74,9 +86,34 @@ object Main {
     Option(localStorage.getItem("wallet_config")).foreach(jQuery("#config").value)
   }
 
+  def renderWalletList(): Unit = {
+    jQuery("body").append("<div id=\"report\"><table id=\"wallet_table\"></table></div>")
+    val table = jQuery("#wallet_table")
+    for (w <- walletList) {
+      for (c <- w.currencies) {
+        table.append(
+          s"""<tr id="balance-${c.name}">
+             |  <td><img src="https://files.coinmarketcap.com/static/img/coins/32x32/${c.name}.png"></td>
+             |  <td class="coins"></td>
+             |  <td class="usd"></td>
+             |  <td class="czk"></td>
+             |</tr>""".stripMargin)
+      }
+    }
+    table.append(
+      """<tfoot>
+        | <tr id="balance-total">
+        |   <td>Total</td>
+        |   <td class="coins"></td>
+        |   <td class="usd"></td>
+        |   <td class="czk"></td>
+        | </tr>
+        |</tfoot>""".stripMargin)
+  }
+
   def setupUI(): Unit = {
     jQuery("body").append(
-      """<p><textarea id="config" rows="16" cols = "128"></textarea></p>
+      """<p><textarea id="config" rows="16" cols="128"></textarea></p>
         |<p>
         | <button id="refresh">Refresh</button>
         | <button id="save_config">Save & apply config</button>

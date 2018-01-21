@@ -1,0 +1,26 @@
+#report {
+	float: left;
+	width: 50%;
+	margin-bottom: 30px;
+}
+
+#wallet_table {
+	border-top: 1px solid #AAAAAA;
+	border-bottom: 1px solid #AAAAAA;
+	border-collapse: collapse;
+}
+
+#wallet_table tr {
+    height: 36px;
+}
+#wallet_table tfoot {
+    font-weight: bold;
+}
+
+#wallet_table td {
+    padding-left: 16px;
+    padding-right: 16px;
+    text-align: right;
+    border-top: 1px solid #AAAAAA;
+    border-bottom: 1px solid #AAAAAA;
+}

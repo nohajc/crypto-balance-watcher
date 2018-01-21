@@ -5,7 +5,7 @@ import hdwallet.ReceivingAddr
 import scala.concurrent.Future
 import monix.execution.Scheduler.Implicits.global
 
-class Wallet(source: BalanceSource, currencies: Seq[Currency]) { // TODO: multisource wallet
+class Wallet(source: BalanceSource, val currencies: Seq[Currency]) { // TODO: multisource wallet
   require(currencies.nonEmpty)
 
   def getBalance(currency: Currency): Future[Balance] = source.getCurrent(currency).map(b => Balance(b , currency)).recover {
