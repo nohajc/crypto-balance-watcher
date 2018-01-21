@@ -21,8 +21,8 @@ class DummyAddressGenerator extends AddressGenerator {
 }
 
 class BTCAddressGenerator extends AddressGenerator {
-  val AddrTypeP2PKH: Byte = 0
-  val AddrTypeP2SH: Byte = 5
+  val AddrTypeP2PKH: Seq[Byte] = Seq(0)
+  val AddrTypeP2SH: Seq[Byte] = Seq(5)
 
   val XpubHeaders = Map(
     "standard" -> 0x0488b21e,
@@ -100,18 +100,22 @@ class BTCAddressGenerator extends AddressGenerator {
 class BCHAddressGenerator extends BTCAddressGenerator
 
 class BTGAddressGenerator extends BTCAddressGenerator {
-  override val AddrTypeP2PKH: Byte = 38
-  override val AddrTypeP2SH: Byte = 23
+  override val AddrTypeP2PKH: Seq[Byte] = Seq(38)
+  override val AddrTypeP2SH: Seq[Byte] = Seq(23)
 }
 
 class LTCAddressGenerator extends BTCAddressGenerator {
   //override val AddrTypeP2PKH: Byte = ???
-  override val AddrTypeP2SH: Byte = 50
+  override val AddrTypeP2SH: Seq[Byte] = Seq(50)
 
   override val XpubHeaders = Map(
     "p2wpkh-p2sh" -> 0x1b26ef6
     // TODO: other types
   )
+}
+
+class ZECAddressGenerator extends BTCAddressGenerator {
+  override val AddrTypeP2PKH: Seq[Byte] = Seq(0x1C, 0xB8).map(_.toByte)
 }
 
 class ETHAddressGenerator extends BTCAddressGenerator {

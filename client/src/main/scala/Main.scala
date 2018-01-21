@@ -29,7 +29,8 @@ object Main {
       Wallet.fromXpub(ETC, Secret.get[String]("XpubETC"), "api.gastracker.io"/*"etcchain.com"*/),
       Wallet.fromAddressList(ADA, Secret.getArray[String]("AddressListADA"), "cardanoexplorer.com"),
       Wallet.fromExchange(Seq(IOTA, TRX), "api.binance.com", Secret.get[Credentials]("BinanceAPI")),
-      Wallet.fromConstant(XMR, Secret.get[Double]("BalanceXMR"))
+      Wallet.fromConstant(XMR, Secret.get[Double]("BalanceXMR")),
+      Wallet.fromXpub(ZEC, Secret.get[String]("XpubZEC"), "zec-bitcore2.trezor.io")
     ).flatten
 
     renderWalletList()
@@ -37,19 +38,22 @@ object Main {
 
   def refresh(): Unit = {
     println("Refreshing...")
-    val fBalances = walletList.flatMap(_.getBalances.map { case (k, v) =>
-      for {
-        b <- v
-        u <- b.inUSD
-        c <- u.inCZK
-      } {
-        val tr = jQuery(s"#balance-${b.currency.name}")
-        tr.find(".coins").html(b.toString)
-        tr.find(".usd").html(u.toString)
-        tr.find(".czk").html(c.toString)
+    val fBalances = walletList.flatMap {w =>
+      w.getBalances.map { case (k, v) =>
+        for {
+          b <- v
+          u <- b.inUSD
+          c <- u.inCZK
+        } {
+          val tr = jQuery(s"#balance-${b.currency.name}")
+          tr.find(".coins").html(b.toString)
+          tr.find(".usd").html(u.toString)
+          tr.find(".czk").html(c.toString)
+          tr.attr("tooltip", w.getSourceInfo)
+        }
+        v
       }
-      v
-    })
+    }
 
     val fValues = fBalances.map { fb =>
       for {

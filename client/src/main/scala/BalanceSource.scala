@@ -6,9 +6,12 @@ import utils.HexUtils._
 import scala.concurrent.Future
 import monix.execution.Scheduler.Implicits.global
 
+import scala.collection.mutable.{Set => MutableSet}
+
 trait BalanceSource {
   def getCurrent(c: Currency = Default): Future[Double]
   // TODO getCurrent - multiple currencies
+  def getInfo: String = ""
 }
 
 object BalanceSource {
@@ -22,9 +25,13 @@ class AddressBalanceSource(addr: String, srcImpl: BalanceSourceImpl) extends Bal
 }
 
 class HDWalletBalanceSource(addresses: Stream[String], srcImpl: BalanceSourceImpl) extends BalanceSource {
+  private val usedAddresses: MutableSet[String] = MutableSet.empty[String]
+
   // TODO: cache previous results
   def scanAddressesFrom(addresses: Stream[String], i: Int, acc: Double = 0): Future[Double] = {
     val addr = addresses(i)
+    usedAddresses += addr
+
     new AddressBalanceSource(addr, srcImpl).getCurrent().flatMap { balance =>
       if (balance != 0)
         scanAddressesFrom(addresses, i + 1, acc + balance)
@@ -33,6 +40,8 @@ class HDWalletBalanceSource(addresses: Stream[String], srcImpl: BalanceSourceImp
   }
 
   override def getCurrent(c: Currency): Future[Double] = scanAddressesFrom(addresses, 0)
+
+  override def getInfo: String = "Wallet addresses:\n" + usedAddresses.mkString(", ")
 }
 
 class BinanceBalanceSource(host: String, credentials: Credentials) extends BalanceSource {
@@ -61,8 +70,12 @@ class BinanceBalanceSource(host: String, credentials: Credentials) extends Balan
       else 0
     }
   }
+
+  override def getInfo: String = "Exchange wallet"
 }
 
 class ConstantBalanceSource(balance: Double) extends BalanceSource {
   override def getCurrent(c: Currency): Future[Double] = Future(balance)
+
+  override def getInfo: String = "Constant balance"
 }

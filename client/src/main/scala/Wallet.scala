@@ -16,6 +16,8 @@ class Wallet(source: BalanceSource, val currencies: Seq[Currency]) { // TODO: mu
   def getBalance: Future[Balance] = getBalance(currencies.head)
   def getBalances: Map[Currency, Future[Balance]] =
     currencies.map(c => c -> getBalance(c)).toMap[Currency, Future[Balance]]
+
+  def getSourceInfo: String = source.getInfo
 }
 
 object Wallet {

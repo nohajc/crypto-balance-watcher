@@ -43,6 +43,12 @@ object Base58Check {
     Base58.encode(str ++ chk)
   }
 
+  def encode(prefix: Seq[Byte], data: Seq[Byte]): String = {
+    val str = prefix ++ data
+    val chk = checksum(str)
+    Base58.encode(str ++ chk)
+  }
+
   def decode(data: String): Seq[Byte] = {
     val strchk = Base58.decode(data)
     val chk = strchk.takeRight(4)

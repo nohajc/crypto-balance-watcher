@@ -24,3 +24,24 @@
     border-top: 1px solid #AAAAAA;
     border-bottom: 1px solid #AAAAAA;
 }
+
+[tooltip]{
+	position:relative;
+}
+[tooltip]:after{
+	content:attr(tooltip);
+	color:#fff;
+	background:#333;
+	background:rgba(51,51,51,0.75);
+	padding:5px;
+	position:absolute;
+	left:-9999px;
+	opacity:0;
+	top:15%;
+	font-size: 8pt;
+}
+[tooltip]:hover:after{
+	left:50%;
+	opacity:1;
+	z-index: 999;
+}
