@@ -2,10 +2,11 @@ import hdwallet.{ScalaXpub, Xpub}
 import monix.execution.Scheduler.Implicits.global
 
 import scala.concurrent.{Await, Future}
-import scala.concurrent.duration.Duration
-
+import scala.concurrent.duration._
 import org.scalajs.jquery.jQuery
 import org.scalajs.dom.window.localStorage
+
+import scala.scalajs.js.timers._
 
 object Main {
   Xpub.selectImplementation(ScalaXpub)
@@ -35,6 +36,7 @@ object Main {
   }
 
   def refresh(): Unit = {
+    println("Refreshing...")
     val fBalances = walletList.flatMap(_.getBalances.map { case (k, v) =>
       for {
         b <- v
@@ -72,6 +74,7 @@ object Main {
         tr.find(".coins").html(total.toString)
         tr.find(".usd").html(totalUSD.toString)
         tr.find(".czk").html(totalCZK.toString)
+        println("Refresh done.")
       }
     }
   }
@@ -128,6 +131,7 @@ object Main {
     jQuery("#restore_config").click(() => restoreConfig())
 
     restoreConfig()
+    //setInterval(10.seconds)(refresh())
   }
 
   def main(args: Array[String]): Unit = {
