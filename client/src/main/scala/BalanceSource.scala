@@ -44,7 +44,10 @@ class BinanceBalanceSource(host: String, credentials: Credentials) extends Balan
     val signature = HMAC(SHA256)(APISecret.getBytes, reqBody.getBytes).toHexString
     val url = s"https://$host/api/v3/account?$reqBody&signature=$signature"
 
-    val request = FakeBrowserHttpRequest(url).withHeader("X-MBX-APIKEY", APIKey)
+    val request = FakeBrowserHttpRequest("http://localhost:8080/proxy")
+      .withQueryParameter("url", url)
+      .withHeader("X-MBX-APIKEY", APIKey)
+
     request.send().map { response =>
       val parsedResponse = response.body.parseOption
 

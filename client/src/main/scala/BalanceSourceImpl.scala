@@ -129,7 +129,8 @@ class GasTrackerBalanceSourceImpl(host: String) extends BalanceSourceImpl {
 
 class CardanoExplorerBalanceSourceImpl(host: String) extends BalanceSourceImpl {
   override def getCurrent(addr: String): Future[Double] = {
-    val request = FakeBrowserHttpRequest(s"https://$host/api/addresses/summary/$addr")
+    val request = FakeBrowserHttpRequest("http://localhost:8080/proxy") // TODO: do not hardcode host
+      .withQueryParameter("url", s"https://$host/api/addresses/summary/$addr") // TODO: calculate utxo
       .withHeader("Accept", "application/json")
     request.send().map { response =>
       val parsedResponse = response.body.parseOption

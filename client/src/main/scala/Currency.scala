@@ -31,42 +31,49 @@ case object Default extends Currency {
 case object BTC extends Currency {
   val name = "bitcoin"
   val short = "BTC"
+  override val symbol = "BTC"
   override val addressGenerator = new BTCAddressGenerator
 }
 
 case object BCH extends Currency {
   val name = "bitcoin-cash"
   val short = "BCH|BCC"
+  override val symbol = "BCH"
   override val addressGenerator = new BCHAddressGenerator
 }
 
 case object BTG extends Currency {
   val name = "bitcoin-gold"
   val short = "BTG"
+  override val symbol = "BTG"
   override val addressGenerator = new BTGAddressGenerator
 }
 
 case object LTC extends Currency {
   val name = "litecoin"
   val short = "LTC"
+  override val symbol = "LTC"
   override val addressGenerator = new LTCAddressGenerator
 }
 
 case object ETH extends Currency {
   val name = "ethereum"
   val short = "ETH"
+  override val symbol = "ETH"
   override val addressGenerator = new ETHAddressGenerator
 }
 
 case object ETC extends Currency {
   val name = "ethereum-classic"
   val short = "ETC"
+  override val symbol = "ETC"
   override val addressGenerator = new ETCAddressGenerator
 }
 
 case object ADA extends Currency {
   val name ="cardano"
   val short = "ADA"
+  override val symbol = "ADA"
 }
 
 case object IOTA extends Currency {
@@ -78,9 +85,11 @@ case object IOTA extends Currency {
 case object XMR extends Currency {
   val name = "monero"
   val short = "XMR"
+  override val symbol = "XMR"
 }
 
 case object TRX extends Currency {
   val name = "tron"
   val short = "TRX"
+  override val symbol = "TRX"
 }

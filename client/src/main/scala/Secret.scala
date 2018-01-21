@@ -24,6 +24,10 @@ object Secret {
     }
   }
 
+  def initFromString(config: String): Unit = {
+    store = config.parseOption.getOrElse(Json.jEmptyObject)
+  }
+
   trait JsonGetter[T] {
     def get(field: Json): T
   }
