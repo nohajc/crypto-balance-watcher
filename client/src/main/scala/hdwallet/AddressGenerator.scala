@@ -105,12 +105,21 @@ class BTGAddressGenerator extends BTCAddressGenerator {
 }
 
 class LTCAddressGenerator extends BTCAddressGenerator {
-  //override val AddrTypeP2PKH: Byte = ???
+  override val AddrTypeP2PKH: Seq[Byte] = Seq(48)
   override val AddrTypeP2SH: Seq[Byte] = Seq(50)
 
   override val XpubHeaders = Map(
     "p2wpkh-p2sh" -> 0x1b26ef6
     // TODO: other types
+  )
+}
+
+class DASHAddressGenerator extends BTCAddressGenerator {
+  override val AddrTypeP2PKH: Seq[Byte] = Seq(76)
+  override val AddrTypeP2SH: Seq[Byte] = Seq(16)
+
+  override val XpubHeaders = Map(
+    "standard" -> 0x02fe52cc
   )
 }
 

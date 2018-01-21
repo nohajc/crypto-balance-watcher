@@ -30,7 +30,8 @@ object Main {
       Wallet.fromAddressList(ADA, Secret.getArray[String]("AddressListADA"), "cardanoexplorer.com"),
       Wallet.fromExchange(Seq(IOTA, TRX), "api.binance.com", Secret.get[Credentials]("BinanceAPI")),
       Wallet.fromConstant(XMR, Secret.get[Double]("BalanceXMR")),
-      Wallet.fromXpub(ZEC, Secret.get[String]("XpubZEC"), "zec-bitcore2.trezor.io")
+      Wallet.fromXpub(ZEC, Secret.get[String]("XpubZEC"), "zec-bitcore2.trezor.io"),
+      Wallet.fromXpub(DASH, Secret.get[String]("XpubDASH"), "dash-bitcore2.trezor.io")
     ).flatten
 
     renderWalletList()

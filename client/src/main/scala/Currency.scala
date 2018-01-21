@@ -56,6 +56,13 @@ case object LTC extends Currency {
   override val addressGenerator = new LTCAddressGenerator
 }
 
+case object DASH extends Currency {
+  val name = "dash"
+  val short = "DASH"
+  override val symbol = "DASH"
+  override val addressGenerator = new DASHAddressGenerator
+}
+
 case object ZEC extends Currency {
   val name = "zcash"
   val short = "ZEC"
