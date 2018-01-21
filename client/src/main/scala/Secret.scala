@@ -36,6 +36,10 @@ object Secret {
     def get(field: Json): String = field.as[String].getOr("")
   }
 
+  implicit val doubleGetter: JsonGetter[Double] = new JsonGetter[Double] {
+    def get(field: Json): Double = field.as[Double].getOr(0.0)
+  }
+
   implicit val credentialsGetter: JsonGetter[Credentials] = new JsonGetter[Credentials] {
     def get(obj: Json): Credentials = {
       val key = obj.fieldOrEmptyString("Key").as[String].getOr("")

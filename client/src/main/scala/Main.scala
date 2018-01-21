@@ -28,7 +28,7 @@ object Main {
       Wallet.fromXpub(ETC, Secret.get[String]("XpubETC"), "api.gastracker.io"/*"etcchain.com"*/),
       Wallet.fromAddressList(ADA, Secret.getArray[String]("AddressListADA"), "cardanoexplorer.com"),
       Wallet.fromExchange(Seq(IOTA, TRX), "api.binance.com", Secret.get[Credentials]("BinanceAPI")),
-      Wallet.fromConstant(XMR, Some(0.58325139))
+      Wallet.fromConstant(XMR, Secret.get[Double]("BalanceXMR"))
     ).flatten
 
     renderWalletList()
@@ -80,6 +80,7 @@ object Main {
     localStorage.setItem("wallet_config", jQuery("#config").value().toString)
     loadConfig()
     initWallets()
+    refresh()
   }
 
   def restoreConfig(): Unit = {
@@ -87,7 +88,7 @@ object Main {
   }
 
   def renderWalletList(): Unit = {
-    jQuery("body").append("<div id=\"report\"><table id=\"wallet_table\"></table></div>")
+    jQuery("#report").html("<table id=\"wallet_table\"></table>")
     val table = jQuery("#wallet_table")
     for (w <- walletList) {
       for (c <- w.currencies) {
